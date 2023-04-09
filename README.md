@@ -1,6 +1,5 @@
-# Hopeful Ribbon 
 
-![Logo2](https://user-images.githubusercontent.com/100744507/230802372-f38a8a84-907d-4044-9aec-b801e7ace3a1.png)
+![Logo2](https://user-images.githubusercontent.com/100744507/230802410-940db2b0-e114-48c1-b10c-461c3796d410.png)
 
 ## Inspiration
 Our inspiration to build such an application was the shortage of doctors across Canada; we realized that separating severe cancer cases from non-severe ones would significantly reduce the workload on doctors and, thus, patiently wait times. Moreover, our team believes in empowering individuals to obtain agency over their health, so we ventured explicitly into breast cancer, as it affects millions of women worldwide.
