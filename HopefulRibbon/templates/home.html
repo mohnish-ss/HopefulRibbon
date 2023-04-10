@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Ubuntu&display=swap"
+			rel="stylesheet"
+		/>
+		<link
+			rel="stylesheet"
+			href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+			integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk"
+			crossorigin="anonymous"
+		/>
+		<script
+			src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+			integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+			crossorigin="anonymous"
+		></script>
+		<script
+			src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+			integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+			crossorigin="anonymous"
+		></script>
+		<script
+			src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"
+			integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI"
+			crossorigin="anonymous"
+		></script>
+		<script
+			src="https://kit.fontawesome.com/77756bd85e.js"
+			crossorigin="anonymous"
+		></script>
+		<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+		<link href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" />
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+		<link rel="preconnect" href="https://fonts.gstatic.com" />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400;500&display=swap"
+			rel="stylesheet"
+		/>
+		<link rel="preconnect" href="https://fonts.gstatic.com" />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Poppins&display=swap"
+			rel="stylesheet"
+		/>
+		<link rel="preconnect" href="https://fonts.gstatic.com" />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Sen&display=swap"
+			rel="stylesheet"
+		/>
+		<link rel="preconnect" href="https://fonts.gstatic.com" />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Sen&display=swap"
+			rel="stylesheet"
+		/>
+		<link rel="preconnect" href="https://fonts.gstatic.com" />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Amiri&display=swap"
+			rel="stylesheet"
+		/>
+		<link rel="icon" href="img/favicon.ico" />
+
+		<link
+			rel="stylesheet"
+			href="{{ url_for('static', filename='css/styles.css') }}"
+		/>
+		<link
+			rel="icon"
+			type="image/x-icon"
+			href="{{ url_for('static', filename='img/logo.ico') }}"
+		/>
+		<title>Hopeful Ribbon</title>
+	</head>
+	<body>
+		<section id="title">
+			<div class="title-header">
+				<h1 class="title-header-main">Hopeful Ribbon</h1>
+				<h3 class="title-header-location">
+					A.I. Powered Breast Cancer Diagnosis
+				</h3>
+			</div>
+		</section>
+
+		<section id="mission">
+			<div class="mission-all">
+				<h1 class="mission-intro">Mission</h1>
+				<div class="mission-line"></div>
+				<div class="mission-dental">
+					Our team believes in the empowerment of individuals to obtain agency
+					over their personal breast health. We strive to make our service as
+					accessible to a vast majority of the global population, in an effort
+					to reduce the incidence and impact of breast cancer. Additionally, we
+					hope to encourage open dialogue amongst individuals to allow for a
+					healthy discussion regarding breast health and to ultimately improve
+					the lives of those affected by this disease.
+				</div>
+			</div>
+
+			<img
+				class="office"
+				src="{{ url_for('static', filename='img/img1.jpg') }}"
+				alt="office"
+			/>
+		</section>
+
+		<section id="mission">
+			<div class="mission-all">
+				<h1 class="mission-intro">Why?</h1>
+				<div class="mission-line"></div>
+				<div class="mission-dental">
+					Early diagnosis in breast cancer is absolutely essential to take
+					preventative measures while the disease is still treatable; the cancer
+					cells may remain dormant for the majority of its lifespan and
+					metastasize without the individual even knowing. Furthermore,
+					according to the American Cancer Society (ACS), breast cancer is the
+					most common cancer among American women, not counting skin cancers.
+					Women in the U.S have an average risk of developing breast cancer
+					sometime in their life is about 12%. With such a large contingent of
+					the global population, awareness compounds in importance. This is
+					summarized best by a MD professional from the Fox Chase Cancer Center,
+					Catherine Tuite: “patients are experiencing better outcomes as a
+					result of early diagnosis, state-of-the-art treatment options, and
+					less extensive surgery.”
+				</div>
+			</div>
+
+			<img
+				class="office"
+				src="{{ url_for('static', filename='img/img2.jpg') }}"
+				alt="office"
+			/>
+		</section>
+
+		<section id="mission">
+			<div class="mission-all">
+				<h1 class="mission-intro">How?</h1>
+				<div class="mission-line"></div>
+				<div class="mission-dental">
+					Our service is intended to help as many women as possible, which is
+					why we made an easily accessible and user-friendly platform. Our web
+					app consists of three simple pieces of information to enter including
+					the radius, texture, and perimeter mean. This information will be
+					obtained from the digitized image of a fine needle aspirate (FNA) of a
+					breast mass. A FNA is a biopsy done to check for an abnormal area of
+					lump for cancer or other diseases; this is done usually when it is
+					palpable or it can be felt. To get a fine needle aspiration (FNA), we
+					recommend consulting your nearest hospital as per the doctor’s
+					official recommendation whether or not they believe the biopsy will be
+					necessary. The doctors will be able to procure a digitized image from
+					the biopsy and interpret the data to find the aforementioned inputs
+					(radius, texture, and perimeter). Additionally, an email will be
+					needed as well. An email will be sent to your inbox with our thorough
+					analysis of what we believe the subsequent steps you should take.
+				</div>
+			</div>
+
+			<img
+				class="office"
+				src="{{ url_for('static', filename='img/img3.jpg') }}"
+				alt="office"
+			/>
+		</section>
+
+		<section id="mission">
+			<div class="mission-all">
+				<h1 class="mission-intro">About Us</h1>
+				<div class="mission-line"></div>
+				<div class="mission-dental">
+					Our team consists of a group of high school students currently
+					residing in Ottawa, Ontario. We are aspiring innovators in our
+					society, but also possess a passion towards combating the hardships of
+					breast cancer, even if that means raising awareness, one life
+					at-a-time.
+				</div>
+			</div>
+
+			<img
+				class="office"
+				src="{{ url_for('static', filename='img/img4.jpg') }}"
+				alt="office"
+			/>
+		</section>
+
+		<section id="footer">
+			<div class="login-box">
+				<h2>Service</h2>
+				<form method="post">
+					<div class="user-box">
+						{{form.name.label}} <br />
+						{{form.name(size=20)}}
+					</div>
+					<div class="user-box">
+						{{form.email.label}} <br />
+						{{form.email(size=20)}}
+					</div>
+					<div class="user-box">
+						{{form.postalcode.label}} <br />
+						{{form.postalcode(size=20)}}
+					</div>
+					<div class="user-box">
+						{{form.radius.label}} <br />
+						{{form.radius(size=20)}}
+					</div>
+					<div class="user-box">
+						{{form.texture.label}} <br />
+						{{form.texture(size=20)}}
+					</div>
+					<div class="user-box">
+						{{form.perimeter.label}} <br />
+						{{form.perimeter(size=20)}}
+					</div>
+					<a>
+						<span></span>
+						<span></span>
+						<span></span>
+						<span></span>
+						{{form.submit}}
+					</a>
+				</form>
+			</div>
+
+			<!-- <form action="" method="post">
+				<p>
+					{{form.name.label}} <br />
+					{{form.name(size=20)}}
+				</p>
+				<p>
+					{{form.email.label}} <br />
+					{{form.email(size=20)}}
+				</p>
+				<p>
+					{{form.postalcode.label}} <br />
+					{{form.postalcode(size=20)}}
+				</p>
+				<p>
+					{{form.radius.label}} <br />
+					{{form.radius(size=20)}}
+				</p>
+				<p>
+					{{form.texture.label}} <br />
+					{{form.texture(size=20)}}
+				</p>
+				<p>
+					{{form.perimeter.label}} <br />
+					{{form.perimeter(size=20)}}
+				</p>
+				<p>{{form.submit}}</p>
+			</form> -->
+
+			<h6 class="footer">
+				Copyright © 2023 HopefulRibbon.ca All Rights Reserved.
+			</h6>
+		</section>
+	</body>
+</html>

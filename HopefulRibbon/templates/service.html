@@ -1,0 +1,29 @@
+{% extends "base.html" %} {% block content %}
+<form action="" method="post">
+	<p>
+		{{form.name.label}} <br />
+		{{form.name(size=30)}}
+	</p>
+	<p>
+		{{form.email.label}} <br />
+		{{form.email(size=30)}}
+	</p>
+	<p>
+		{{form.postalcode.label}} <br />
+		{{form.postalcode(size=30)}}
+	</p>
+	<p>
+		{{form.radius.label}} <br />
+		{{form.radius(size=30)}}
+	</p>
+	<p>
+		{{form.texture.label}} <br />
+		{{form.texture(size=30)}}
+	</p>
+	<p>
+		{{form.perimeter.label}} <br />
+		{{form.perimeter(size=30)}}
+	</p>
+	<p>{{form.submit}}</p>
+</form>
+{% endblock %}
