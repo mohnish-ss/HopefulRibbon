@@ -28,13 +28,17 @@ from sklearn.preprocessing import StandardScaler
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'fortnite')  # Fallback to 'fortnite' if not set
 
+# Get the absolute path to the app directory
+APP_DIR = os.path.dirname(os.path.abspath(__file__))
+
 global result
 global name
 
 def train_model():
     """Train and return the best KNN model for breast cancer prediction"""
     # Step 1: Load and prepare the data
-    data = pd.read_csv("breast-cancer.csv", sep=",")
+    data_path = os.path.join(APP_DIR, 'data', 'breast-cancer.csv')
+    data = pd.read_csv(data_path, sep=",")
     # Select relevant features and target variable
     data = data[["diagnosis", "radius_mean", "texture_mean", "perimeter_mean"]]
     predict = "diagnosis"
@@ -59,11 +63,13 @@ def train_model():
         # Save the best model
         if accuracy > best:
             best = accuracy
-            with open("breast_cancer_model.pickle", "wb") as f:
+            model_path = os.path.join(APP_DIR, 'models', 'breast_cancer_model.pickle')
+            with open(model_path, "wb") as f:
                 pickle.dump(model, f)
 
     # Step 4: Load the best model for predictions
-    pickle_in = open("breast_cancer_model.pickle", "rb")
+    model_path = os.path.join(APP_DIR, 'models', 'breast_cancer_model.pickle')
+    pickle_in = open(model_path, "rb")
     return pickle.load(pickle_in)
 
 def process_form_data(form_data):
@@ -160,7 +166,8 @@ def home():
 
 # Load and preprocess the breast cancer dataset
 def load_data():
-    data = pd.read_csv('breast-cancer.csv')
+    data_path = os.path.join(APP_DIR, 'data', 'breast-cancer.csv')
+    data = pd.read_csv(data_path)
     
     # Clean column names by stripping whitespace
     data.columns = data.columns.str.strip()

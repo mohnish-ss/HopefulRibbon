@@ -121,9 +121,9 @@
 					sometime in their life is about 12%. With such a large contingent of
 					the global population, awareness compounds in importance. This is
 					summarized best by a MD professional from the Fox Chase Cancer Center,
-					Catherine Tuite: “patients are experiencing better outcomes as a
+					Catherine Tuite: "patients are experiencing better outcomes as a
 					result of early diagnosis, state-of-the-art treatment options, and
-					less extensive surgery.”
+					less extensive surgery."
 				</div>
 			</div>
 
@@ -147,7 +147,7 @@
 					breast mass. A FNA is a biopsy done to check for an abnormal area of
 					lump for cancer or other diseases; this is done usually when it is
 					palpable or it can be felt. To get a fine needle aspiration (FNA), we
-					recommend consulting your nearest hospital as per the doctor’s
+					recommend consulting your nearest hospital as per the doctor's
 					official recommendation whether or not they believe the biopsy will be
 					necessary. The doctors will be able to procure a digitized image from
 					the biopsy and interpret the data to find the aforementioned inputs
@@ -188,67 +188,36 @@
 			<div class="login-box">
 				<h2>Service</h2>
 				<form method="post">
+					{{ form.csrf_token }}
 					<div class="user-box">
-						{{form.name.label}} <br />
-						{{form.name(size=20)}}
+						{{ form.name.label }} <br />
+						{{ form.name(size=20, class="form-control") }}
 					</div>
 					<div class="user-box">
-						{{form.email.label}} <br />
-						{{form.email(size=20)}}
+						{{ form.email.label }} <br />
+						{{ form.email(size=20, class="form-control") }}
 					</div>
 					<div class="user-box">
-						{{form.postalcode.label}} <br />
-						{{form.postalcode(size=20)}}
+						{{ form.postalcode.label }} <br />
+						{{ form.postalcode(size=20, class="form-control") }}
 					</div>
 					<div class="user-box">
-						{{form.radius.label}} <br />
-						{{form.radius(size=20)}}
+						{{ form.radius.label }} <br />
+						{{ form.radius(size=20, class="form-control") }}
 					</div>
 					<div class="user-box">
-						{{form.texture.label}} <br />
-						{{form.texture(size=20)}}
+						{{ form.texture.label }} <br />
+						{{ form.texture(size=20, class="form-control") }}
 					</div>
 					<div class="user-box">
-						{{form.perimeter.label}} <br />
-						{{form.perimeter(size=20)}}
+						{{ form.perimeter.label }} <br />
+						{{ form.perimeter(size=20, class="form-control") }}
 					</div>
-					<a>
-						<span></span>
-						<span></span>
-						<span></span>
-						<span></span>
-						{{form.submit}}
-					</a>
+					<div class="user-box">
+						{{ form.submit(class="btn btn-primary") }}
+					</div>
 				</form>
 			</div>
-
-			<!-- <form action="" method="post">
-				<p>
-					{{form.name.label}} <br />
-					{{form.name(size=20)}}
-				</p>
-				<p>
-					{{form.email.label}} <br />
-					{{form.email(size=20)}}
-				</p>
-				<p>
-					{{form.postalcode.label}} <br />
-					{{form.postalcode(size=20)}}
-				</p>
-				<p>
-					{{form.radius.label}} <br />
-					{{form.radius(size=20)}}
-				</p>
-				<p>
-					{{form.texture.label}} <br />
-					{{form.texture(size=20)}}
-				</p>
-				<p>
-					{{form.perimeter.label}} <br />
-					{{form.perimeter(size=20)}}
-				</p>
-				<p>{{form.submit}}</p>
-			</form> -->
 
 			<h6 class="footer">
 				Copyright © 2023 HopefulRibbon.ca All Rights Reserved.

@@ -1,12 +1,16 @@
 from flask_wtf import FlaskForm
-from wtforms import SubmitField, StringField, FloatField
+from wtforms import StringField, FloatField, SubmitField
+from wtforms.validators import DataRequired, Email, Optional
 
 
 class ServiceForm(FlaskForm):
-    name = StringField("Name")
-    email = StringField("E-Mail")
-    postalcode = StringField("Postal Code")
-    radius = FloatField("Radius")
-    texture = FloatField("Texture")
-    perimeter = FloatField("Perimeter")
-    submit = SubmitField("Submit")
+    name = StringField('Name', validators=[DataRequired()])
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    postalcode = StringField('Postal Code', validators=[DataRequired()])
+    
+    # Breast cancer features
+    radius = FloatField('Radius', validators=[DataRequired()])
+    texture = FloatField('Texture', validators=[DataRequired()])
+    perimeter = FloatField('Perimeter', validators=[DataRequired()])
+    
+    submit = SubmitField('Submit')
