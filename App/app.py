@@ -1,5 +1,10 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 from forms import ServiceForm
+from dotenv import load_dotenv
+import os
+
+# Load environment variables from .env file
+load_dotenv()
 
 import sklearn
 from sklearn.neighbors import KNeighborsClassifier
@@ -15,10 +20,13 @@ import requests
 from bs4 import BeautifulSoup
 import googlemaps
 from datetime import datetime
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.preprocessing import StandardScaler
 
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'fortnite'
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'fortnite')  # Fallback to 'fortnite' if not set
 
 global result
 global name
@@ -87,7 +95,8 @@ def process_form_data(form_data):
 def send_result_email(prediction_result, hospital_info=None):
     """Send email with prediction results and hospital information"""
     receiver_email = prediction_result['email']
-    sender_email = 'hopefulribbon@gmail.com'
+    sender_email = os.getenv('EMAIL_USER')
+    email_password = os.getenv('EMAIL_PASSWORD')
     subject = 'Breast Cancer Results'
     
     # Prepare email body based on prediction
@@ -122,7 +131,7 @@ def send_result_email(prediction_result, hospital_info=None):
     try:
         with smtplib.SMTP('smtp.gmail.com', 587) as smtp:
             smtp.starttls()
-            smtp.login(sender_email, 'uddqpqwemiullrhn')
+            smtp.login(sender_email, email_password)
             smtp.send_message(message)
         print('Email sent successfully')
         return True
@@ -148,6 +157,72 @@ def home():
         send_result_email(prediction_result, hospital_info)
         
     return render_template('home.html', form=form)
+
+# Load and preprocess the breast cancer dataset
+def load_data():
+    data = pd.read_csv('breast-cancer.csv')
+    
+    # Clean column names by stripping whitespace
+    data.columns = data.columns.str.strip()
+    
+    # Clean data values by stripping whitespace
+    for col in data.columns:
+        if data[col].dtype == 'object':
+            data[col] = data[col].str.strip()
+    
+    # Convert diagnosis to binary (M=1, B=0)
+    data['diagnosis'] = data['diagnosis'].map({'M': 1, 'B': 0})
+    
+    # Select features and target
+    features = ['radius_mean', 'texture_mean', 'perimeter_mean']
+    X = data[features]
+    y = data['diagnosis']
+    
+    # Split the data
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    
+    # Scale the features
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+    X_test_scaled = scaler.transform(X_test)
+    
+    # Train the model
+    model = RandomForestClassifier(n_estimators=100, random_state=42)
+    model.fit(X_train_scaled, y_train)
+    
+    return model, scaler, features
+
+# Load the model and scaler
+model, scaler, features = load_data()
+
+@app.route('/predict', methods=['POST'])
+def predict():
+    try:
+        # Get values from the form
+        radius = float(request.form['radius'])
+        texture = float(request.form['texture'])
+        perimeter = float(request.form['perimeter'])
+        
+        # Create input array
+        input_data = np.array([[radius, texture, perimeter]])
+        
+        # Scale the input
+        input_scaled = scaler.transform(input_data)
+        
+        # Make prediction
+        prediction = model.predict(input_scaled)[0]
+        probability = model.predict_proba(input_scaled)[0][1]
+        
+        # Convert prediction to text
+        result = "Malignant" if prediction == 1 else "Benign"
+        
+        return jsonify({
+            'prediction': result,
+            'probability': f"{probability:.2%}"
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
 
 if __name__ == "__main__":
     app.run()
