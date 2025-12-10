@@ -1,5 +1,6 @@
 # Environment variables
 .env
+.venv
 
 # macOS system files
 .DS_Store
@@ -8,3 +9,4 @@
 app/__pycache__
 *.py[cod]
 *$py.class
+.vercel

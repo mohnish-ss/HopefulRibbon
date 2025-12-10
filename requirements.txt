@@ -3,6 +3,5 @@ flask-wtf
 wtforms
 python-dotenv
 scikit-learn
-pandas
 numpy
-gunicorn 
+gunicorn

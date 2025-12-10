@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, jsonify
-from App.forms import ServiceForm
+from forms import ServiceForm
 from dotenv import load_dotenv
 import os
 
@@ -8,7 +8,7 @@ load_dotenv()
 
 import sklearn
 from sklearn.neighbors import KNeighborsClassifier
-import pandas as pd
+from sklearn.ensemble import RandomForestClassifier
 import numpy as np
 import pickle
 
@@ -16,8 +16,6 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
-from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import StandardScaler
 
 
@@ -30,43 +28,19 @@ APP_DIR = os.path.dirname(os.path.abspath(__file__))
 global result
 global name
 
-def train_model():
-    """Train and return the best KNN model for breast cancer prediction"""
-    # Step 1: Load and prepare the data
-    data_path = os.path.join(APP_DIR, 'data', 'breast-cancer.csv')
-    data = pd.read_csv(data_path, sep=",")
-    # Select relevant features and target variable
-    data = data[["diagnosis", "radius_mean", "texture_mean", "perimeter_mean"]]
-    predict = "diagnosis"
+def load_knn_model():
+    """Load the best KNN model for breast cancer prediction from disk"""
+    models_dir = os.path.join(APP_DIR, 'models')
+    model_path = os.path.join(models_dir, 'breast_cancer_model.pickle')
 
-    # Step 2: Prepare features (X) and target (y)
-    x = np.array(data.drop(columns=[predict]))
-    y = np.array(data[predict])
-    # Split data into training (90%) and testing (10%) sets
-    x_train, x_test, y_train, y_test = sklearn.model_selection.train_test_split(x, y, test_size=0.1)
-
-    # Step 3: Train multiple models to find the best one
-    best = 0
-    for i in range(30):
-        # Create new random split for each iteration
-        x_train, x_test, y_train, y_test = sklearn.model_selection.train_test_split(x, y, test_size=0.1)
-        # Initialize KNN classifier with 9 neighbors
-        model = KNeighborsClassifier(n_neighbors=9)
-        # Train the model
-        model.fit(x_train, y_train)
-        # Calculate accuracy
-        accuracy = model.score(x_test, y_test)
-        # Save the best model
-        if accuracy > best:
-            best = accuracy
-            model_path = os.path.join(APP_DIR, 'models', 'breast_cancer_model.pickle')
-            with open(model_path, "wb") as f:
-                pickle.dump(model, f)
-
-    # Step 4: Load the best model for predictions
-    model_path = os.path.join(APP_DIR, 'models', 'breast_cancer_model.pickle')
-    pickle_in = open(model_path, "rb")
-    return pickle.load(pickle_in)
+    # Check if model already exists
+    if os.path.exists(model_path):
+        print("Loading existing KNN model...")
+        with open(model_path, "rb") as f:
+            return pickle.load(f)
+    
+    # If model doesn't exist, we cannot train it in this environment (no pandas)
+    raise FileNotFoundError("KNN Model not found. Please run 'python setup_models.py' locally to generate it.")
 
 def process_form_data(form_data):
     """Process form data and return prediction results"""
@@ -80,7 +54,7 @@ def process_form_data(form_data):
     email = form_data.get('email')
 
     # Load model and make prediction
-    model = train_model()
+    model = load_knn_model()
     predicted = model.predict(information)
     
     # Determine result
@@ -161,42 +135,21 @@ def home():
     return render_template('home.html', form=form)
 
 # Load and preprocess the breast cancer dataset
-def load_data():
-    data_path = os.path.join(APP_DIR, 'data', 'breast-cancer.csv')
-    data = pd.read_csv(data_path)
+# Load and preprocess the breast cancer dataset
+def load_rf_model():
+    models_dir = os.path.join(APP_DIR, 'models')
+    rf_model_path = os.path.join(models_dir, 'rf_model_data.pickle')
     
-    # Clean column names by stripping whitespace
-    data.columns = data.columns.str.strip()
-    
-    # Clean data values by stripping whitespace
-    for col in data.columns:
-        if data[col].dtype == 'object':
-            data[col] = data[col].str.strip()
-    
-    # Convert diagnosis to binary (M=1, B=0)
-    data['diagnosis'] = data['diagnosis'].map({'M': 1, 'B': 0})
-    
-    # Select features and target
-    features = ['radius_mean', 'texture_mean', 'perimeter_mean']
-    X = data[features]
-    y = data['diagnosis']
-    
-    # Split the data
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    
-    # Scale the features
-    scaler = StandardScaler()
-    X_train_scaled = scaler.fit_transform(X_train)
-    X_test_scaled = scaler.transform(X_test)
-    
-    # Train the model
-    model = RandomForestClassifier(n_estimators=100, random_state=42)
-    model.fit(X_train_scaled, y_train)
-    
-    return model, scaler, features
+    # Try to load existing model data
+    if os.path.exists(rf_model_path):
+        print("Loading existing RandomForest model data...")
+        with open(rf_model_path, "rb") as f:
+            return pickle.load(f)
+
+    raise FileNotFoundError("RandomForest Model not found. Please run 'python setup_models.py' locally to generate it.")
 
 # Load the model and scaler
-model, scaler, features = load_data()
+model, scaler, features = load_rf_model()
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -228,7 +181,7 @@ def predict():
         return jsonify({'error': str(e)}), 400
 
 if __name__ == "__main__":
-    app.run()
+    app.run(port=5001, debug=True)
 
 
 
