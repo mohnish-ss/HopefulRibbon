@@ -20,7 +20,10 @@ from sklearn.preprocessing import StandardScaler
 
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'fortnite')  # Fallback to 'fortnite' if not set
+SECRET_KEY = os.getenv('SECRET_KEY')
+if not SECRET_KEY:
+    raise RuntimeError("SECRET_KEY must be set before starting the app.")
+app.config['SECRET_KEY'] = SECRET_KEY
 
 # Get the absolute path to the app directory
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -73,6 +76,8 @@ def send_result_email(prediction_result, hospital_info=None):
     receiver_email = prediction_result['email']
     sender_email = os.getenv('EMAIL_USER')
     email_password = os.getenv('EMAIL_PASSWORD')
+    if not sender_email or not email_password:
+        raise RuntimeError("EMAIL_USER and EMAIL_PASSWORD must be set before sending email.")
     subject = 'Breast Cancer Results'
     
     # Prepare email body based on prediction
@@ -119,18 +124,19 @@ def send_result_email(prediction_result, hospital_info=None):
 @app.route('/home', methods=['GET', 'POST'])
 def home():
     form = ServiceForm()
-    if form.is_submitted():
-        result = request.form
-        print(result)
-        
+    if form.validate_on_submit():
         # Process form data and get prediction
-        prediction_result = process_form_data(result)
+        prediction_result = process_form_data(request.form)
         
         # Get hospital information (if Google Maps API is working)
         hospital_info = None  # You can add Google Maps API functionality here
         
         # Send email with results
-        send_result_email(prediction_result, hospital_info)
+        try:
+            send_result_email(prediction_result, hospital_info)
+        except RuntimeError:
+            app.logger.exception("Email service is not configured correctly.")
+            return render_template('home.html', form=form), 500
         
     return render_template('home.html', form=form)
 
@@ -181,7 +187,6 @@ def predict():
         return jsonify({'error': str(e)}), 400
 
 if __name__ == "__main__":
-    app.run(port=5001, debug=True)
-
+    app.run(port=5001, debug=os.getenv("FLASK_DEBUG") == "1")
 
 
