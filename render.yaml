@@ -6,8 +6,8 @@ services:
     startCommand: gunicorn App.app:app
     envVars:
       - key: SECRET_KEY
-        value: your_secret_key
+        generateValue: true
       - key: EMAIL_USER
-        value: your_email
+        sync: false
       - key: EMAIL_PASSWORD
-        value: your_email_password
+        sync: false

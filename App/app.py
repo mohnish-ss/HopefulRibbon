@@ -24,7 +24,10 @@ from sklearn.preprocessing import StandardScaler
 
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'fortnite')  # Fallback to 'fortnite' if not set
+SECRET_KEY = os.getenv('SECRET_KEY')
+if not SECRET_KEY:
+    raise RuntimeError("SECRET_KEY must be set before starting the app.")
+app.config['SECRET_KEY'] = SECRET_KEY
 
 # Get the absolute path to the app directory
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -77,6 +80,8 @@ def send_result_email(prediction_result, hospital_info=None):
     receiver_email = prediction_result['email']
     sender_email = os.getenv('EMAIL_USER')
     email_password = os.getenv('EMAIL_PASSWORD')
+    if not sender_email or not email_password:
+        raise RuntimeError("EMAIL_USER and EMAIL_PASSWORD must be set before sending email.")
     subject = 'Breast Cancer Results'
     
     # Prepare email body based on prediction
@@ -196,5 +201,4 @@ def predict():
         return jsonify({'error': str(e)}), 400
 
 if __name__ == "__main__":
-    app.run(port=5001, debug=True)
-
+    app.run(port=5001, debug=os.getenv("FLASK_DEBUG") == "1")
