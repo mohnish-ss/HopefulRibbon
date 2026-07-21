@@ -1,5 +1,9 @@
 from flask import Flask, render_template, request, jsonify
-from forms import ServiceForm
+
+try:
+    from .forms import ServiceForm
+except ImportError:
+    from forms import ServiceForm
 from dotenv import load_dotenv
 import os
 
@@ -45,27 +49,27 @@ def load_knn_model():
 def process_form_data(form_data):
     """Process form data and return prediction results"""
     # Extract form data
-    information = [[0, 0, 0]]
-    information[0][0] = float(form_data.get('radius'))
-    information[0][1] = float(form_data.get('texture'))
-    information[0][2] = float(form_data.get('perimeter'))
-    name = form_data.get('name')
+    radius     = float(form_data.get('radius'))
+    texture    = float(form_data.get('texture'))
+    perimeter  = float(form_data.get('perimeter'))
+    name       = form_data.get('name')
     postalcode = form_data.get('postalcode')
-    email = form_data.get('email')
+    email      = form_data.get('email')
 
-    # Load model and make prediction
-    model = load_knn_model()
-    predicted = model.predict(information)
-    
-    # Determine result
-    hasBreastCancer = predicted[0] != "B"
-    
+    # Scale input and predict using the globally loaded model & scaler
+    input_data   = np.array([[radius, texture, perimeter]])
+    input_scaled = scaler.transform(input_data)
+    predicted    = model.predict(input_scaled)
+
+    # Determine result (model predicts 1=Malignant, 0=Benign)
+    hasBreastCancer = bool(predicted[0] == 1)
+
     return {
         'name': name,
         'postalcode': postalcode,
         'email': email,
         'hasBreastCancer': hasBreastCancer,
-        'prediction': predicted[0]
+        'prediction': 'M' if hasBreastCancer else 'B'
     }
 
 def send_result_email(prediction_result, hospital_info=None):
@@ -119,20 +123,18 @@ def send_result_email(prediction_result, hospital_info=None):
 @app.route('/home', methods=['GET', 'POST'])
 def home():
     form = ServiceForm()
+    prediction_result = None
     if form.is_submitted():
         result = request.form
         print(result)
-        
+
         # Process form data and get prediction
         prediction_result = process_form_data(result)
-        
-        # Get hospital information (if Google Maps API is working)
-        hospital_info = None  # You can add Google Maps API functionality here
-        
-        # Send email with results
-        send_result_email(prediction_result, hospital_info)
-        
-    return render_template('home.html', form=form)
+
+        # Email functionality disabled for demo
+        # send_result_email(prediction_result, hospital_info)
+
+    return render_template('home.html', form=form, prediction_result=prediction_result)
 
 # Load and preprocess the breast cancer dataset
 # Load and preprocess the breast cancer dataset
@@ -149,7 +151,7 @@ def load_rf_model():
     raise FileNotFoundError("RandomForest Model not found. Please run 'python setup_models.py' locally to generate it.")
 
 # Load the model and scaler
-model, scaler, features = load_rf_model()
+model, scaler = load_knn_model()
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -158,6 +160,19 @@ def predict():
         radius = float(request.form['radius'])
         texture = float(request.form['texture'])
         perimeter = float(request.form['perimeter'])
+
+        ranges = {
+            'radius': (6.981, 28.11),
+            'texture': (9.71, 39.28),
+            'perimeter': (43.79, 188.5),
+        }
+        values = {'radius': radius, 'texture': texture, 'perimeter': perimeter}
+        for field, value in values.items():
+            minimum, maximum = ranges[field]
+            if not minimum <= value <= maximum:
+                return jsonify({
+                    'error': f'{field.title()} must be between {minimum} and {maximum}.'
+                }), 400
         
         # Create input array
         input_data = np.array([[radius, texture, perimeter]])
@@ -182,6 +197,4 @@ def predict():
 
 if __name__ == "__main__":
     app.run(port=5001, debug=True)
-
-
 
