@@ -6,22 +6,14 @@ except ImportError:
     from forms import ServiceForm
 from dotenv import load_dotenv
 import os
-
-# Load environment variables from .env file
-load_dotenv()
-
-import sklearn
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.ensemble import RandomForestClassifier
 import numpy as np
 import pickle
-
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
-from sklearn.preprocessing import StandardScaler
-
+# Load environment variables from .env file
+load_dotenv()
 
 app = Flask(__name__)
 SECRET_KEY = os.getenv('SECRET_KEY')
@@ -32,8 +24,6 @@ app.config['SECRET_KEY'] = SECRET_KEY
 # Get the absolute path to the app directory
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
 
-global result
-global name
 
 def load_knn_model():
     """Load the best KNN model for breast cancer prediction from disk"""
@@ -140,20 +130,6 @@ def home():
         # send_result_email(prediction_result, hospital_info)
 
     return render_template('home.html', form=form, prediction_result=prediction_result)
-
-# Load and preprocess the breast cancer dataset
-# Load and preprocess the breast cancer dataset
-def load_rf_model():
-    models_dir = os.path.join(APP_DIR, 'models')
-    rf_model_path = os.path.join(models_dir, 'rf_model_data.pickle')
-    
-    # Try to load existing model data
-    if os.path.exists(rf_model_path):
-        print("Loading existing RandomForest model data...")
-        with open(rf_model_path, "rb") as f:
-            return pickle.load(f)
-
-    raise FileNotFoundError("RandomForest Model not found. Please run 'python setup_models.py' locally to generate it.")
 
 # Load the model and scaler
 model, scaler = load_knn_model()
