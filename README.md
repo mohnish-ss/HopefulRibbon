@@ -151,7 +151,7 @@ Open `http://127.0.0.1:5001`. A production WSGI process can use `gunicorn 'App.a
 - CSRF protection, a 16 KiB request limit, secure cookie settings, and generic user-facing errors are enabled.
 - Facility API failures and denied browser location permission fall back safely; external calls have timeouts.
 
-See [SECURITY.md](SECURITY.md) for the historical credential finding and reporting guidance.
+Historical credential exposure was identified during the refactor; any old Google Maps or email credentials must be revoked and rotated. New secrets belong only in environment variables and must not be committed.
 
 ## Repository structure
 
