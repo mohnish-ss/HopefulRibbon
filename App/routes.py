@@ -31,9 +31,7 @@ def home():
                     "malignant_probability": result.malignant_probability,
                 }
             except InputValidationError:
-                form_error = (
-                    "Invalid measurements. Check all required values and allowed ranges."
-                )
+                form_error = "Invalid measurements. Check all required values and allowed ranges."
         else:
             form_error = "Please correct the highlighted form fields and try again."
     return render_template(
@@ -51,9 +49,12 @@ def predict():
     try:
         result = _prediction_service().predict(request.form)
     except InputValidationError:
-        return jsonify(
-            error="Invalid measurements. Check all required values and allowed ranges."
-        ), 400
+        return (
+            jsonify(
+                error="Invalid measurements. Check all required values and allowed ranges."
+            ),
+            400,
+        )
 
     facilities: list[dict[str, str]] = []
     facility_message: str | None = None
@@ -73,7 +74,9 @@ def predict():
             current_app.logger.warning(
                 "Facility lookup unavailable: %s", error.log_reason
             )
-            facility_message = "Nearby facility recommendations are temporarily unavailable."
+            facility_message = (
+                "Nearby facility recommendations are temporarily unavailable."
+            )
 
     return jsonify(
         prediction=result.display_label,
