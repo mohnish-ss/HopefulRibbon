@@ -25,14 +25,18 @@ def test_missing_input_returns_generic_validation_error(client, valid_payload):
     valid_payload.pop("texture")
     response = client.post("/predict", data=valid_payload)
     assert response.status_code == 400
-    assert response.get_json() == {"error": "Texture is required."}
+    assert response.get_json() == {
+        "error": "Invalid measurements. Check all required values and allowed ranges."
+    }
 
 
 def test_nonnumeric_input_returns_validation_error(client, valid_payload):
     valid_payload["texture"] = "private-health-value"
     response = client.post("/predict", data=valid_payload)
     assert response.status_code == 400
-    assert response.get_json() == {"error": "Texture must be a number."}
+    assert response.get_json() == {
+        "error": "Invalid measurements. Check all required values and allowed ranges."
+    }
     assert "private-health-value" not in response.get_data(as_text=True)
 
 
@@ -40,7 +44,9 @@ def test_out_of_range_input_returns_validation_error(client, valid_payload):
     valid_payload["radius"] = "999"
     response = client.post("/predict", data=valid_payload)
     assert response.status_code == 400
-    assert "between" in response.get_json()["error"]
+    assert response.get_json() == {
+        "error": "Invalid measurements. Check all required values and allowed ranges."
+    }
 
 
 def test_location_api_failure_is_nonfatal(app, client, valid_payload, monkeypatch):
