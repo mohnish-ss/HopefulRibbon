@@ -4,8 +4,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Hopeful Ribbon — AI-powered breast cancer screening tool that delivers instant on-screen diagnosis from FNA biopsy metrics.">
-  <title>Hopeful Ribbon | AI-Powered Breast Cancer Screening</title>
+  <meta name="description" content="Hopeful Ribbon — an educational machine-learning classification project using Wisconsin breast-cancer data.">
+  <title>Hopeful Ribbon | Educational ML Classifier</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,10 +21,7 @@
        NAV
        ══════════════════════════════════════ -->
   <nav>
-    <div class="nav-logo">
-      <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Hopeful Ribbon logo">
-      Hopeful<span>Ribbon</span>
-    </div>
+    <div class="nav-logo" aria-label="Hopeful Ribbon">Hopeful <span>Ribbon</span></div>
     <ul class="nav-links">
       <li><a href="#mission">Mission</a></li>
       <li><a href="#why">Why Us</a></li>
@@ -41,7 +38,7 @@
     <div class="hero-content">
       <div class="hero-badge">
         <span class="dot"></span>
-        AI-Powered Screening Tool
+        Educational ML Classification Project
       </div>
 
       <h1 class="hero-title">
@@ -50,12 +47,12 @@
       </h1>
 
       <p class="hero-subtitle">
-        Enter your FNA biopsy metrics and receive an instant AI-driven breast cancer risk assessment — right on your screen.
+        Explore how a reproducibly trained classifier responds to three measurements from the Wisconsin Breast Cancer dataset.
       </p>
 
       <div class="hero-actions">
         <a href="#diagnose" class="btn btn-primary">
-          Start Screening &nbsp;→
+          Try the Classifier &nbsp;→
         </a>
         <a href="#mission" class="btn btn-ghost">
           Learn More
@@ -70,12 +67,12 @@
 
     <div class="hero-stats">
       <div class="stat-item">
-        <span class="stat-number">95%+</span>
-        <span class="stat-label">Model Accuracy</span>
+        <span class="stat-number">{{ '%.1f'|format(model_summary.test_metrics.recall_malignant * 100) }}%</span>
+        <span class="stat-label">Held-out malignant recall</span>
       </div>
       <div class="stat-item">
-        <span class="stat-number">~569</span>
-        <span class="stat-label">Training Samples</span>
+        <span class="stat-number">{{ model_summary.dataset_rows }}</span>
+        <span class="stat-label">Dataset rows</span>
       </div>
       <div class="stat-item">
         <span class="stat-number">&lt;1s</span>
@@ -153,7 +150,7 @@
         <div class="card">
           <div class="card-icon">⚡</div>
           <h3>Receive Instant Results</h3>
-          <p>Our KNN machine learning model analyzes your data in under a second and displays a clear, on-screen assessment — benign or malignant.</p>
+          <p>The serialized scikit-learn pipeline returns a dataset class and probability. It does not diagnose disease or estimate clinical risk.</p>
         </div>
       </div>
     </div>
@@ -183,10 +180,10 @@
 
         <!-- Left: info -->
         <div class="diagnose-info">
-          <span class="section-label">AI Screening</span>
-          <h2 class="section-title">Get Your<br>Instant Assessment</h2>
+          <span class="section-label">Educational Classifier</span>
+          <h2 class="section-title">Explore a<br>Model Classification</h2>
           <p class="section-body">
-            Fill in the three FNA metrics from your biopsy report. Our trained KNN model will classify your sample and display the result immediately on this page.
+            Enter three mean measurements represented in the dataset. The selected {{ model_summary.model_type }} pipeline will classify the values for demonstration.
           </p>
 
           <div class="how-steps">
@@ -194,7 +191,7 @@
               <div class="step-num">1</div>
               <div class="step-text">
                 <h4>Personal Info</h4>
-                <p>Enter your name and optional contact details.</p>
+                <p>Enter a display name and location for the optional facility search.</p>
               </div>
             </div>
             <div class="step">
@@ -208,23 +205,25 @@
               <div class="step-num">3</div>
               <div class="step-text">
                 <h4>View Results</h4>
-                <p>Hit "Analyze" and see your AI screening result instantly.</p>
+                <p>View the model class, probability, and educational disclaimer.</p>
               </div>
             </div>
           </div>
 
           <p class="medical-note">
-            ⚠️ This tool is for informational screening purposes only and does <strong>not</strong> constitute a medical diagnosis. Always consult a qualified healthcare professional.
+            ⚠️ This educational project is <strong>not a clinical tool</strong>. Its output is not a diagnosis and cannot replace assessment by a qualified medical professional.
           </p>
         </div>
 
         <!-- Right: form -->
         <div class="form-card">
-          <h2>AI Diagnosis Service</h2>
-          <p class="form-subtitle">Powered by a K-Nearest Neighbors classifier trained on the Wisconsin Breast Cancer Dataset.</p>
+          <h2>Dataset Classifier</h2>
+          <p class="form-subtitle">Powered by the selected {{ model_summary.model_type }} pipeline. Three features are retained for interface simplicity, not because they are claimed to be the most clinically important.</p>
 
           <form method="post" id="diagnosis-form">
             {{ form.csrf_token }}
+
+            {% if form_error %}<p class="form-error">{{ form_error }}</p>{% endif %}
 
             <div class="form-divider">Personal Information</div>
 
@@ -242,6 +241,10 @@
               <div class="form-group">
                 <label class="form-label">{{ form.postalcode.label.text }}</label>
                 {{ form.postalcode(class="form-control", placeholder="A1B 2C3") }}
+                <button type="button" class="location-button" id="use-location">Use my location</button>
+                <span class="form-range" id="location-status" aria-live="polite">If location permission is unavailable, the postal code is used.</span>
+                <input type="hidden" name="latitude" id="latitude">
+                <input type="hidden" name="longitude" id="longitude">
               </div>
             </div>
 
@@ -274,20 +277,19 @@
 
           <!-- ── Result Card ── -->
           {% if prediction_result %}
-          <div id="result-card" class="result-card {{ 'malignant' if prediction_result.hasBreastCancer else 'benign' }}">
+          <div id="result-card" class="result-card {{ 'malignant' if prediction_result.is_malignant else 'benign' }}">
             <div class="result-icon">
-              {% if prediction_result.hasBreastCancer %}⚠️{% else %}✅{% endif %}
+              {% if prediction_result.is_malignant %}⚠️{% else %}✅{% endif %}
             </div>
             <p class="result-name">Analysis for <strong>{{ prediction_result.name }}</strong></p>
-            <h3>
-              {% if prediction_result.hasBreastCancer %}Likely Malignant{% else %}Likely Benign{% endif %}
-            </h3>
+            <h3>{{ prediction_result.message }}</h3>
             <span class="result-pill">
-              {{ "Malignant (M)" if prediction_result.hasBreastCancer else "Benign (B)" }}
+              {{ "Malignant (M)" if prediction_result.is_malignant else "Benign (B)" }}
             </span>
+            <p class="result-probability">Malignant-class probability: {{ '%.1f'|format(prediction_result.malignant_probability * 100) }}%</p>
             <p class="result-disclaimer">
-              This is an AI-assisted screening result — <strong>not a medical diagnosis</strong>.<br>
-              Please consult a qualified healthcare professional for a proper clinical evaluation.
+              Educational demonstration only — <strong>not a medical diagnosis</strong>.<br>
+              This cannot replace assessment by a qualified medical professional.
             </p>
           </div>
           {% endif %}
@@ -313,10 +315,10 @@
             We are a passionate team of student developers who built Hopeful Ribbon to demonstrate that cutting-edge machine learning can be applied to real-world health challenges.
           </p>
           <p class="section-body">
-            Our deep commitment to combating breast cancer through technology and awareness drives us to continuously improve the accuracy, accessibility, and impact of this tool.
+            We use this project to demonstrate careful machine-learning validation, secure web inference, and the limitations of dataset-based classification.
           </p>
           <p class="section-body">
-            In the future, we aim to expand our model to cover additional health conditions and integrate real-time location services to connect high-risk patients with nearby clinics.
+            Nearby facility suggestions are available when the external provider is configured, but they are informational and not endorsements or care recommendations.
           </p>
         </div>
       </div>
@@ -332,6 +334,27 @@
 
   <script>
     const diagnosisForm = document.getElementById('diagnosis-form');
+    const locationButton = document.getElementById('use-location');
+    const locationStatus = document.getElementById('location-status');
+
+    locationButton.addEventListener('click', () => {
+      if (!navigator.geolocation) {
+        locationStatus.textContent = 'Location is unavailable in this browser; the postal code will be used.';
+        return;
+      }
+      locationStatus.textContent = 'Requesting location permission…';
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          document.getElementById('latitude').value = position.coords.latitude;
+          document.getElementById('longitude').value = position.coords.longitude;
+          locationStatus.textContent = 'Location added for nearby facility lookup.';
+        },
+        () => {
+          locationStatus.textContent = 'Location permission was unavailable; the postal code will be used.';
+        },
+        { enableHighAccuracy: false, timeout: 5000, maximumAge: 300000 }
+      );
+    });
 
     diagnosisForm.addEventListener('submit', async (event) => {
       event.preventDefault();
@@ -363,12 +386,17 @@
         resultCard.innerHTML = `
           <div class="result-icon">${isMalignant ? '⚠️' : '✅'}</div>
           <p class="result-name">Analysis for <strong>${name.replace(/[&<>"']/g, (char) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[char]))}</strong></p>
-          <h3>${isMalignant ? 'Likely Malignant' : 'Likely Benign'}</h3>
+          <h3>${data.message}</h3>
           <span class="result-pill">${isMalignant ? 'Malignant (M)' : 'Benign (B)'}</span>
+          <p class="result-probability">Malignant-class probability: ${(data.malignant_probability * 100).toFixed(1)}%</p>
           <p class="result-disclaimer">
-            This is an AI-assisted screening result — <strong>not a medical diagnosis</strong>.<br>
-            Please consult a qualified healthcare professional for a proper clinical evaluation.
-          </p>`;
+            ${data.disclaimer}
+          </p>
+          ${data.facilities.length ? `
+            <div class="facility-list">
+              <h4>Nearby medical facilities</h4>
+              <ul>${data.facilities.map((facility) => `<li><strong>${escapeHtml(facility.name)}</strong><br>${escapeHtml(facility.address)}</li>`).join('')}</ul>
+            </div>` : (data.facility_message ? `<p class="facility-message">${escapeHtml(data.facility_message)}</p>` : '')}`;
 
         resultCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       } catch (error) {
@@ -385,6 +413,10 @@
         submitButton.textContent = originalLabel;
       }
     });
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, (char) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[char]));
+    }
   </script>
 
 </body>

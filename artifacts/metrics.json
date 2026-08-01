@@ -1,0 +1,258 @@
+{
+  "class_distribution": {
+    "all": {
+      "benign": {
+        "count": 356,
+        "proportion": 0.627866
+      },
+      "malignant": {
+        "count": 211,
+        "proportion": 0.372134
+      }
+    },
+    "test": {
+      "benign": {
+        "count": 72,
+        "proportion": 0.631579
+      },
+      "malignant": {
+        "count": 42,
+        "proportion": 0.368421
+      }
+    },
+    "train": {
+      "benign": {
+        "count": 284,
+        "proportion": 0.626932
+      },
+      "malignant": {
+        "count": 169,
+        "proportion": 0.373068
+      }
+    }
+  },
+  "feature_set_comparison_training_cv_only": {
+    "all_numeric_predictor_features": {
+      "cross_validation": {
+        "accuracy": {
+          "mean": 0.973455,
+          "std": 0.013354
+        },
+        "f1": {
+          "mean": 0.963965,
+          "std": 0.018665
+        },
+        "precision": {
+          "mean": 0.971092,
+          "std": 0.025937
+        },
+        "recall": {
+          "mean": 0.958645,
+          "std": 0.039845
+        },
+        "roc_auc": {
+          "mean": 0.995516,
+          "std": 0.004465
+        }
+      },
+      "feature_count": 30,
+      "model": "Logistic Regression",
+      "selected_hyperparameters": {
+        "C": 0.1,
+        "class_weight": "balanced"
+      }
+    },
+    "method": "Logistic Regression GridSearchCV on identical training folds",
+    "note": "No final test data was used for this feature-set comparison.",
+    "three_interface_features": {
+      "cross_validation": {
+        "accuracy": {
+          "mean": 0.898462,
+          "std": 0.038938
+        },
+        "f1": {
+          "mean": 0.865157,
+          "std": 0.052642
+        },
+        "precision": {
+          "mean": 0.85762,
+          "std": 0.058005
+        },
+        "recall": {
+          "mean": 0.875936,
+          "std": 0.067824
+        },
+        "roc_auc": {
+          "mean": 0.963799,
+          "std": 0.0181
+        }
+      },
+      "model": "Logistic Regression",
+      "selected_hyperparameters": {
+        "C": 10.0,
+        "class_weight": "balanced"
+      }
+    }
+  },
+  "features_used": [
+    "radius_mean",
+    "texture_mean",
+    "perimeter_mean"
+  ],
+  "generated_at": "2026-08-01T19:41:56.705306+00:00",
+  "model_comparison": [
+    {
+      "cross_validation": {
+        "accuracy": {
+          "mean": 0.534042,
+          "std": 0.036737
+        },
+        "f1": {
+          "mean": 0.338294,
+          "std": 0.052481
+        },
+        "precision": {
+          "mean": 0.36,
+          "std": 0.057349
+        },
+        "recall": {
+          "mean": 0.319073,
+          "std": 0.04831
+        },
+        "roc_auc": {
+          "mean": 0.490489,
+          "std": 0.039571
+        }
+      },
+      "model": "Dummy Classifier",
+      "selected_hyperparameters": {
+        "strategy": "stratified"
+      }
+    },
+    {
+      "cross_validation": {
+        "accuracy": {
+          "mean": 0.898462,
+          "std": 0.038938
+        },
+        "f1": {
+          "mean": 0.865157,
+          "std": 0.052642
+        },
+        "precision": {
+          "mean": 0.85762,
+          "std": 0.058005
+        },
+        "recall": {
+          "mean": 0.875936,
+          "std": 0.067824
+        },
+        "roc_auc": {
+          "mean": 0.963799,
+          "std": 0.0181
+        }
+      },
+      "model": "Logistic Regression",
+      "selected_hyperparameters": {
+        "C": 10.0,
+        "class_weight": "balanced"
+      }
+    },
+    {
+      "cross_validation": {
+        "accuracy": {
+          "mean": 0.907302,
+          "std": 0.032268
+        },
+        "f1": {
+          "mean": 0.871648,
+          "std": 0.047856
+        },
+        "precision": {
+          "mean": 0.894174,
+          "std": 0.036566
+        },
+        "recall": {
+          "mean": 0.85205,
+          "std": 0.067093
+        },
+        "roc_auc": {
+          "mean": 0.950573,
+          "std": 0.020072
+        }
+      },
+      "model": "K-Nearest Neighbors",
+      "selected_hyperparameters": {
+        "n_neighbors": 17,
+        "p": 1,
+        "weights": "uniform"
+      }
+    },
+    {
+      "cross_validation": {
+        "accuracy": {
+          "mean": 0.896337,
+          "std": 0.032914
+        },
+        "f1": {
+          "mean": 0.85752,
+          "std": 0.047092
+        },
+        "precision": {
+          "mean": 0.87841,
+          "std": 0.052276
+        },
+        "recall": {
+          "mean": 0.840107,
+          "std": 0.060911
+        },
+        "roc_auc": {
+          "mean": 0.954644,
+          "std": 0.023507
+        }
+      },
+      "model": "Random Forest",
+      "selected_hyperparameters": {
+        "class_weight": "balanced",
+        "max_depth": 12,
+        "min_samples_leaf": 3,
+        "n_estimators": 200
+      }
+    }
+  ],
+  "selected_hyperparameters": {
+    "C": 10.0,
+    "class_weight": "balanced"
+  },
+  "selected_model": "Logistic Regression",
+  "selection_rule": "Highest mean cross-validation recall for malignant class; ties broken by F1, ROC-AUC, then accuracy.",
+  "test_metrics": {
+    "accuracy": 0.903509,
+    "confusion_matrix": {
+      "false_negative": 4,
+      "false_positive": 7,
+      "labels": [
+        "Benign",
+        "Malignant"
+      ],
+      "true_negative": 65,
+      "true_positive": 38,
+      "values": [
+        [
+          65,
+          7
+        ],
+        [
+          4,
+          38
+        ]
+      ]
+    },
+    "f1_malignant": 0.873563,
+    "false_negative_count": 4,
+    "false_negative_rate": 0.095238,
+    "precision_malignant": 0.844444,
+    "recall_malignant": 0.904762,
+    "roc_auc": 0.973214
+  }
+}

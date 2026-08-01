@@ -1,12 +1,29 @@
-# Environment variables
+# Local configuration and secrets
 .env
-.venv
+.env.*
+!.env.example
 
-# macOS system files
-.DS_Store
+# Virtual environments
+.venv/
+venv/
+env/
 
-# Python cache files
-app/__pycache__
+# Python caches and tooling
+__pycache__/
 *.py[cod]
 *$py.class
-.vercel
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# Local generated files
+artifacts/*.tmp
+*.log
+
+# Editors, OS, and platform metadata
+.DS_Store
+.idea/
+.vscode/
+.vercel/

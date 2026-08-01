@@ -1,0 +1,1 @@
+"""Hopeful Ribbon automated tests."""

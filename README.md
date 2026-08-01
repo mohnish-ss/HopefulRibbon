@@ -1,26 +1,204 @@
+# Hopeful Ribbon
 
-![Logo2](https://user-images.githubusercontent.com/100744507/230802410-940db2b0-e114-48c1-b10c-461c3796d410.png)
+Hopeful Ribbon is an educational Flask application that demonstrates a reproducible binary-classification workflow on the Wisconsin Diagnostic Breast Cancer dataset. It compares four scikit-learn model families, deploys the pipeline selected by training-only stratified cross-validation, validates inference inputs, and can suggest nearby medical facilities through an optional location integration.
 
-## Inspiration
-Our inspiration to build such an application was the shortage of doctors across Canada; we realized that separating severe cancer cases from non-severe ones would significantly reduce the workload on doctors and, thus, patiently wait times. Moreover, our team believes in empowering individuals to obtain agency over their health, so we ventured explicitly into breast cancer, as it affects millions of women worldwide.
+> **Medical disclaimer:** This repository is a machine-learning education project, not a clinical tool. Its output is not a diagnosis, treatment recommendation, or estimate of an individual's real-world cancer risk. Dataset performance does not establish medical validity. A qualified medical professional must interpret any actual biopsy or health concern.
 
-## What it does
-The program aims to have users input data they received from an FNA test, where a needle is inserted, an abnormal lump within the breast and sample cells are extracted. After running simple tests on the cells, raw data is provided, which the user can input into our website. Then, using a machine learning algorithm trained explicitly by a data set, our website will determine whether you are at risk for breast cancer. Finally, the website will send this information to the user via their email, and if they are at risk of cancer, the email will include nearby hospitals.
+## Architecture
 
-## How we built it
-The back end of the program consists of the machine learning portion, the location service, and the email service, which all use Python. The machine learning portion was coded in PyCharm, using the “tensorflow” library, while the others were coded in Visual Studio Code using Google’s location and email APIs. Finally, the front end (website) was created using HTML and CSS, displaying relevant information regarding our project, i.e. about us, service, etc.
+```text
+Explicit training command                         Flask runtime
+CSV -> schema validation -> stratified split      startup -> validate metadata
+    -> training-only GridSearchCV                  -> load fitted pipeline once
+    -> recall-first model selection                -> validate ordered inputs
+    -> one untouched test evaluation               -> class + probability
+    -> model, metadata, metrics, plots              -> optional facility API
+```
 
-## Challenges we ran into
-Some challenges we ran into during the hackathon:
-Connecting the back end to the front end using Flask was a more complex challenge than expected. We resolved this by creating a new environment where the application file was in a more accessible directory. 
-Merging code was also a problem because this was our first time connecting different parts of code to a single project. We approached this problem by creating communicating with each other about certain variables/methods we would use throughout the code.
+Training and inference are deliberately separate. `scripts/train_model.py` is the only training entry point. The Flask application factory loads `artifacts/model.joblib` and its metadata once at startup and fails clearly when the files are missing or incompatible; no request can trigger retraining.
 
-## Accomplishments that we're proud of
-Our team's main accomplishment was finding the solution to our problem by merging the back and front ends. Initially, we thought the website wouldn’t work after countless hours of trying, but after switching our approach to the problem, we quickly found a solution; after trying for hours on end, finding the answer was a significant breakthrough. In addition, we took great pride in our collaboration throughout the hackathon, as many of our features wouldn’t be possible without teamwork.
+## Dataset and target
 
-## What we learned
-We learned many valuable lessons while competing in the hackathon. For example, we learned skills such as connecting the front-end and back-end of an application to create a website. In addition, we also became much more familiar with HTML, CSS and Python and learned many of the intricacies involved in these languages.
+The checked-in `App/data/breast-cancer.csv` is derived from the [UCI Breast Cancer Wisconsin (Diagnostic) dataset](https://archive.ics.uci.edu/dataset/17/breast-cancer-wisconsin-diagnostic) (DOI `10.24432/C5DW2B`). Features describe properties computed from digitized images of fine-needle aspirate cell nuclei. The target mapping is:
 
-## What's next for Hopeful Ribbon
-Our team strives to create a better learning model to increase the accuracy at which it interprets and diagnoses patient data. We also strive to expand our service to breast cancer patients and other health conditions such as arrhythmia. 
+- `M` (malignant) -> `1`, the positive class
+- `B` (benign) -> `0`
 
+The repository copy contains 567 rows: 211 malignant and 356 benign. The canonical UCI dataset lists 569 instances, so results in this repository apply specifically to the checked-in copy. The loader removes `id` and unnamed columns, checks the target and required predictors, rejects unknown labels, and rejects missing, malformed, NaN, or infinite features.
+
+## Features used
+
+The deployed interface uses these exact ordered features:
+
+1. `radius_mean`
+2. `texture_mean`
+3. `perimeter_mean`
+
+They were retained to preserve the original three-field experience and keep the demonstration understandable. They were **not** selected statistically and are not claimed to be the three most important or clinically critical variables. This is interface-driven feature restriction, not dimensionality reduction.
+
+To quantify the trade-off without touching the test set, the training pipeline compares Logistic Regression on the same training folds:
+
+| Feature set | Features | CV malignant recall | CV F1 | CV ROC-AUC |
+| --- | ---: | ---: | ---: | ---: |
+| Interface features | 3 | 0.8759 +/- 0.0678 | 0.8652 +/- 0.0526 | 0.9638 +/- 0.0181 |
+| All numeric predictors | 30 | 0.9586 +/- 0.0398 | 0.9640 +/- 0.0187 | 0.9955 +/- 0.0045 |
+
+The full-feature benchmark is materially stronger in cross-validation. It is retained as analysis only because the deployed UI cannot collect all 30 measurements. No full-feature result was consulted during final test evaluation.
+
+## Training and validation methodology
+
+- Deterministic random seed: `42`
+- One stratified 80/20 train/test split
+- Untouched 114-row test partition held back until final selection
+- Shuffled 5-fold `StratifiedKFold` cross-validation on the 453 training rows
+- `GridSearchCV` for reasonable family-specific hyperparameters
+- `StandardScaler` inside the Logistic Regression and KNN pipelines
+- Baseline Dummy Classifier plus Logistic Regression, KNN, and Random Forest
+- Selection by mean malignant-class recall, with F1, ROC-AUC, and accuracy as tie-breakers
+- Exactly one evaluation of the selected model on the test partition
+
+This design prevents preprocessing leakage because each scaler is fitted only within its pipeline's current training fold. Candidate models never see the held-out test partition during tuning or selection.
+
+## Model comparison
+
+These are training-only cross-validation results for each family's recall-optimized hyperparameters:
+
+| Model | Accuracy | Precision (M) | Recall (M) | F1 (M) | ROC-AUC |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Dummy Classifier | 0.5340 +/- 0.0367 | 0.3600 +/- 0.0573 | 0.3191 +/- 0.0483 | 0.3383 +/- 0.0525 | 0.4905 +/- 0.0396 |
+| **Logistic Regression** | **0.8985 +/- 0.0389** | **0.8576 +/- 0.0580** | **0.8759 +/- 0.0678** | **0.8652 +/- 0.0526** | **0.9638 +/- 0.0181** |
+| K-Nearest Neighbors | 0.9073 +/- 0.0323 | 0.8942 +/- 0.0366 | 0.8521 +/- 0.0671 | 0.8716 +/- 0.0479 | 0.9506 +/- 0.0201 |
+| Random Forest | 0.8963 +/- 0.0329 | 0.8784 +/- 0.0523 | 0.8401 +/- 0.0609 | 0.8575 +/- 0.0471 | 0.9546 +/- 0.0235 |
+
+The selected Logistic Regression uses `C=10.0` and `class_weight="balanced"`. Accuracy alone did not determine selection.
+
+## Final untouched test results
+
+Latest generated artifacts (`2026-08-01`, scikit-learn `1.7.2`):
+
+| Metric | Result |
+| --- | ---: |
+| Accuracy | 0.9035 |
+| Malignant precision | 0.8444 |
+| Malignant recall | 0.9048 |
+| Malignant F1 | 0.8736 |
+| ROC-AUC | 0.9732 |
+| False negatives | 4 of 42 malignant test rows |
+| False-negative rate | 0.0952 |
+
+Confusion matrix (`[[TN, FP], [FN, TP]]`): `[[65, 7], [4, 38]]`.
+
+The four false negatives matter more than the headline accuracy: they are malignant-labelled dataset rows that the model classified as benign. In a real clinical workflow such errors could delay follow-up, which is one reason this model must not be used for patient care. Metrics are also available in `artifacts/metrics.json`; the plots are in `artifacts/confusion_matrix.png` and `artifacts/roc_curve.png`.
+
+## Installation
+
+Python 3.11 or newer is recommended. From the repository root:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+cp .env.example .env
+```
+
+Generate a secret with `python -c "import secrets; print(secrets.token_hex(32))"` and place it in `.env`.
+
+## Environment variables
+
+| Variable | Required | Purpose |
+| --- | --- | --- |
+| `SECRET_KEY` | Yes | Flask-WTF session and CSRF protection |
+| `GOOGLE_MAPS_API_KEY` | No | Google Geocoding and Places requests for nearby hospitals |
+| `FACILITY_API_TIMEOUT` | No | External request timeout in seconds; default `5` |
+| `MAX_CONTENT_LENGTH` | No | Maximum request body bytes; default `16384` |
+| `SESSION_COOKIE_SECURE` | Production HTTPS | Sends the session cookie only over HTTPS |
+| `MODEL_PATH` | No | Override the default model artifact path |
+| `MODEL_METADATA_PATH` | No | Override the default metadata path |
+
+Restrict any Maps key to only the needed APIs and deployment origins. Do not commit `.env`.
+
+## Commands
+
+Train and regenerate all artifacts:
+
+```bash
+python scripts/train_model.py
+```
+
+Run the tests and coverage report:
+
+```bash
+pytest
+pytest --cov=App --cov-report=term-missing
+```
+
+Start the development server:
+
+```bash
+python App/app.py
+```
+
+Open `http://127.0.0.1:5001`. A production WSGI process can use `gunicorn 'App.app:app'` with a production `SECRET_KEY` and HTTPS-aware cookie configuration.
+
+## Inference and privacy safeguards
+
+- The serialized pipeline and metadata are validated and loaded once at startup.
+- Inputs must be present, numeric, finite, within dataset-supported ranges, and are assembled in artifact-defined order.
+- Responses include the class, malignant-class probability, predicted-class confidence, and a medical disclaimer.
+- Output wording describes similarity to a dataset class and never tells a user that they have cancer.
+- Submitted measurements are not logged.
+- CSRF protection, a 16 KiB request limit, secure cookie settings, and generic user-facing errors are enabled.
+- Facility API failures and denied browser location permission fall back safely; external calls have timeouts.
+
+See [SECURITY.md](SECURITY.md) for the historical credential finding and reporting guidance.
+
+## Repository structure
+
+```text
+.
+├── App/
+│   ├── __init__.py              # Application factory and error handlers
+│   ├── app.py                   # Local/WSGI entry point
+│   ├── config.py                # Environment configuration
+│   ├── routes.py                # Thin Flask routes
+│   ├── forms.py                 # WTForms schema
+│   ├── data/breast-cancer.csv
+│   ├── ml/
+│   │   ├── data.py              # Dataset validation
+│   │   └── training.py          # Search, selection, evaluation, artifacts
+│   ├── services/
+│   │   ├── prediction.py        # Model loading and safe inference
+│   │   └── facilities.py        # Timeout-bounded location integration
+│   ├── templates/
+│   └── static/
+├── artifacts/                   # Model, metadata, metrics, and plots
+├── scripts/train_model.py
+├── tests/
+├── .env.example
+├── MODEL_CARD.md
+├── SECURITY.md
+├── pyproject.toml
+└── requirements.txt
+```
+
+`setup_models.py` remains only as a backward-compatible wrapper; new work should call `scripts/train_model.py`.
+
+## Limitations
+
+- The checked-in dataset has 567 rows rather than the canonical 569 and may not match every published benchmark.
+- The deployed three-feature interface gives up substantial cross-validation performance versus the 30-feature benchmark.
+- This is a small, historical, curated dataset; it does not establish generalization across institutions, equipment, populations, or current clinical practice.
+- No external clinical validation, probability calibration study, subgroup fairness analysis, or prospective evaluation has been performed.
+- Input ranges are bounded by this dataset, not by clinical reference standards.
+- Nearby facilities depend on Google provider coverage and configuration and are not endorsements.
+
+## Future improvements
+
+- Design a usable 30-feature import flow rather than manually collecting three values.
+- Add probability calibration and decision-threshold analysis using training-only nested validation.
+- Evaluate subgroup performance when an appropriately governed dataset supports it.
+- Add CI for tests, formatting, dependency checks, and artifact reproducibility.
+- Replace the legacy nearby-search endpoint if the configured provider retires it.
+
+Additional intended-use and ethics details are in [MODEL_CARD.md](MODEL_CARD.md).

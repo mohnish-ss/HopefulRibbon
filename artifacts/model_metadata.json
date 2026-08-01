@@ -1,0 +1,122 @@
+{
+  "artifact_format_version": 1,
+  "class_distribution": {
+    "all": {
+      "benign": {
+        "count": 356,
+        "proportion": 0.627866
+      },
+      "malignant": {
+        "count": 211,
+        "proportion": 0.372134
+      }
+    },
+    "test": {
+      "benign": {
+        "count": 72,
+        "proportion": 0.631579
+      },
+      "malignant": {
+        "count": 42,
+        "proportion": 0.368421
+      }
+    },
+    "train": {
+      "benign": {
+        "count": 284,
+        "proportion": 0.626932
+      },
+      "malignant": {
+        "count": 169,
+        "proportion": 0.373068
+      }
+    }
+  },
+  "dataset_filename": "breast-cancer.csv",
+  "dataset_rows": 567,
+  "feature_names": [
+    "radius_mean",
+    "texture_mean",
+    "perimeter_mean"
+  ],
+  "feature_ranges": {
+    "perimeter_mean": {
+      "max": 188.5,
+      "min": 43.79
+    },
+    "radius_mean": {
+      "max": 28.11,
+      "min": 6.981
+    },
+    "texture_mean": {
+      "max": 39.28,
+      "min": 9.71
+    }
+  },
+  "feature_rationale": "The three mean measurements are retained for compatibility with the existing educational UI, not because they were proven to be the most important.",
+  "final_test_metrics": {
+    "accuracy": 0.903509,
+    "confusion_matrix": {
+      "false_negative": 4,
+      "false_positive": 7,
+      "labels": [
+        "Benign",
+        "Malignant"
+      ],
+      "true_negative": 65,
+      "true_positive": 38,
+      "values": [
+        [
+          65,
+          7
+        ],
+        [
+          4,
+          38
+        ]
+      ]
+    },
+    "f1_malignant": 0.873563,
+    "false_negative_count": 4,
+    "false_negative_rate": 0.095238,
+    "precision_malignant": 0.844444,
+    "recall_malignant": 0.904762,
+    "roc_auc": 0.973214
+  },
+  "model_type": "Logistic Regression",
+  "positive_class": "M",
+  "random_seed": 42,
+  "scikit_learn_version": "1.7.2",
+  "selected_cross_validation": {
+    "accuracy": {
+      "mean": 0.898462,
+      "std": 0.038938
+    },
+    "f1": {
+      "mean": 0.865157,
+      "std": 0.052642
+    },
+    "precision": {
+      "mean": 0.85762,
+      "std": 0.058005
+    },
+    "recall": {
+      "mean": 0.875936,
+      "std": 0.067824
+    },
+    "roc_auc": {
+      "mean": 0.963799,
+      "std": 0.0181
+    }
+  },
+  "selected_hyperparameters": {
+    "C": 10.0,
+    "class_weight": "balanced"
+  },
+  "target_mapping": {
+    "B": 0,
+    "M": 1
+  },
+  "training_date": "2026-08-01T19:41:56.705306+00:00",
+  "validation_strategy": "Stratified 80/20 train/test split; 5-fold shuffled StratifiedKFold GridSearchCV on training data only; model family selected primarily by malignant recall; one final test evaluation."
+}
